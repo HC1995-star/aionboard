@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradedoubler Onboarding Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chat-message {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .pulse-loader {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .confetti {
+            animation: confetti-fall 3s ease-out forwards;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-80 bg-white shadow-lg p-6 overflow-y-auto">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Tradedoubler</h2>
+                <p class="text-sm text-gray-600">AI Onboarding Assistant</p>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Progress</span>
+                    <span id="progress-percentage" class="text-sm font-medium text-blue-600">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Completion Badge -->
+            <div id="completion-badge" class="hidden mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="font-bold text-green-800">Onboarding Complete!</span>
+                </div>
+                <p class="text-xs text-green-700">Our team will contact you within 24 hours.</p>
+            </div>
+
+            <!-- Checklist -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">Onboarding Checklist</h3>
+                
+                <div id="checklist-intro" class="checklist-item flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    </svg>
+                    <span class="text-sm text-gray-500">Introduction & Details</span>
+                </div>
+
+                <div id="checklist-brandedTracking" class="checklist-item flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    </svg>
+                    <span class="text-sm text-gray-500">Branded Tracking Setup</span>
+                </div>
+
+                <div id="checklist-productFeed" class="checklist-item flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    </svg>
+                    <span class="text-sm text-gray-500">Product Feed Links</span>
+                </div>
+
+                <div id="checklist-assets" class="checklist-item flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    </svg>
+                    <span class="text-sm text-gray-500">Program Assets</span>
+                </div>
+
+                <div id="checklist-ipAddresses" class="checklist-item flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    </svg>
+                    <span class="text-sm text-gray-500">Office IP Addresses</span>
+                </div>
+
+                <div id="checklist-trackingScripts" class="checklist-item flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    </svg>
+                    <span class="text-sm text-gray-500">Tracking Scripts</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                <button id="upload-btn" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    Upload Files
+                </button>
+                <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.gif,.png,.csv,.xml" class="hidden">
+            </div>
+
+            <!-- Collected Data Summary -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-700 mb-3">Collected Data</h3>
+                <div id="data-summary" class="text-xs text-gray-600 space-y-1">
+                    <p>No data collected yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Chat messages -->
+            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Initial message -->
+                <div class="flex justify-start">
+                    <div class="max-w-2xl rounded-2xl px-4 py-3 bg-white shadow-md text-gray-800 chat-message">
+                        <p class="mb-2">Hi! 👋 I'm your Tradedoubler onboarding assistant.</p>
+                        <p class="mb-2">I'll guide you through setting up your affiliate program step by step. This typically takes 10-15 minutes.</p>
+                        <p class="mb-3"><strong>We'll cover:</strong></p>
+                        <ul class="space-y-1 ml-4 mb-3">
+                            <li>• Branded Tracking setup</li>
+                            <li>• Product feed configuration</li>
+                            <li>• Program assets (logos, ads, T&Cs)</li>
+                            <li>• Office IP addresses</li>
+                            <li>• Tracking script implementation</li>
+                        </ul>
+                        <p>Let's get started! <strong>What's your name and which company are you representing?</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input area -->
+            <div class="border-t border-gray-200 bg-white p-4">
+                <div class="max-w-4xl mx-auto flex gap-3">
+                    <input
+                        type="text"
+                        id="message-input"
+                        placeholder="Type your message..."
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button
+                        id="send-btn"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - UPDATE THIS WITH YOUR n8n WEBHOOK URL
+        // ============================================
+        const N8N_WEBHOOK_URL = 'https://harrytradedoubler2026.app.n8n.cloud/webhook/onboarding-chat';
+        // ============================================
+
+        // State management
+        let conversationHistory = [];
+        let onboardingData = {};
+        let checklist = {
+            intro: false,
+            brandedTracking: false,
+            productFeed: false,
+            assets: false,
+            ipAddresses: false,
+            trackingScripts: false
+        };
+        let sessionId = generateSessionId();
+        let isComplete = false;
+
+        // DOM elements
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const dataSummary = document.getElementById('data-summary');
+        const completionBadge = document.getElementById('completion-badge');
+
+        // Initialize
+        conversationHistory.push({
+            role: 'assistant',
+            content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll guide you through setting up your affiliate program step by step. This typically takes 10-15 minutes.\n\nWe'll cover:\n• Branded Tracking setup\n• Product feed configuration\n• Program assets (logos, ads, T&Cs)\n• Office IP addresses\n• Tracking script implementation\n\nLet's get started! What's your name and which company are you representing?"
+        });
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // Functions
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message || sendBtn.disabled || isComplete) return;
+
+            // Disable input
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+
+            // Add user message to chat
+            addMessageToChat('user', message);
+            conversationHistory.push({ role: 'user', content: message });
+            messageInput.value = '';
+
+            // Show loading indicator
+            const loadingId = addLoadingIndicator();
+
+            try {
+                // Call n8n webhook
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sessionId: sessionId,
+                        message: message,
+                        conversationHistory: conversationHistory,
+                        onboardingData: onboardingData,
+                        checklist: checklist
+                    })
+                });
+
+                const data = await response.json();
+
+                // Remove loading indicator
+                removeLoadingIndicator(loadingId);
+
+                // Add assistant response
+                addMessageToChat('assistant', data.response);
+                conversationHistory.push({ role: 'assistant', content: data.response });
+
+                // Update onboarding data and checklist
+                if (data.onboardingData) {
+                    onboardingData = data.onboardingData;
+                    updateDataSummary();
+                }
+                if (data.checklist) {
+                    checklist = data.checklist;
+                    updateChecklist(data.checklist);
+                }
+
+                // Check if complete
+                if (data.isComplete) {
+                    isComplete = true;
+                    showCompletionCelebration();
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                removeLoadingIndicator(loadingId);
+                addMessageToChat('assistant', 'I apologize, but I encountered an error. Please try again.');
+            } finally {
+                // Re-enable input
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                if (!isComplete) {
+                    messageInput.focus();
+                }
+            }
+        }
+
+        function addMessageToChat(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-2xl rounded-2xl px-4 py-3 chat-message ${
+                role === 'user' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white shadow-md text-gray-800'
+            }`;
+            
+            // Format content with line breaks and lists
+            const formattedContent = content.split('\n').map(line => {
+                if (line.startsWith('•') || line.startsWith('-')) {
+                    return `<p class="ml-4">${line}</p>`;
+                } else if (line.includes('===')) {
+                    return `<p class="font-bold mt-2">${line.replace(/=/g, '')}</p>`;
+                }
+                return line ? `<p class="mb-1">${line}</p>` : '<p class="mb-1"></p>';
+            }).join('');
+            
+            bubble.innerHTML = formattedContent;
+            messageDiv.appendChild(bubble);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addLoadingIndicator() {
+            const loadingId = 'loading_' + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.id = loadingId;
+            messageDiv.className = 'flex justify-start';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bg-white shadow-md rounded-2xl px-4 py-3';
+            bubble.innerHTML = `
+                <div class="flex gap-1">
+                    <div class="w-2 h-2 bg-blue-600 rounded-full pulse-loader"></div>
+                    <div class="w-2 h-2 bg-blue-600 rounded-full pulse-loader" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-blue-600 rounded-full pulse-loader" style="animation-delay: 0.4s"></div>
+                </div>
+            `;
+            
+            messageDiv.appendChild(bubble);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return loadingId;
+        }
+
+        function removeLoadingIndicator(loadingId) {
+            const element = document.getElementById(loadingId);
+            if (element) element.remove();
+        }
+
+        function updateChecklist(checklistData) {
+            const items = ['intro', 'brandedTracking', 'productFeed', 'assets', 'ipAddresses', 'trackingScripts'];
+            let completed = 0;
+
+            items.forEach(item => {
+                const element = document.getElementById(`checklist-${item}`);
+                if (checklistData[item]) {
+                    element.querySelector('svg').innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" fill="currentColor"/>
+                    `;
+                    element.querySelector('svg').classList.remove('text-gray-300');
+                    element.querySelector('svg').classList.add('text-green-500');
+                    element.querySelector('span').classList.remove('text-gray-500');
+                    element.querySelector('span').classList.add('text-gray-700', 'font-medium');
+                    completed++;
+                }
+            });
+
+            const percentage = Math.round((completed / items.length) * 100);
+            document.getElementById('progress-percentage').textContent = `${percentage}%`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        }
+
+        function updateDataSummary() {
+            const summary = [];
+            
+            if (onboardingData.clientName) {
+                summary.push(`<p><strong>Client:</strong> ${onboardingData.clientName}</p>`);
+            }
+            if (onboardingData.companyName) {
+                summary.push(`<p><strong>Company:</strong> ${onboardingData.companyName}</p>`);
+            }
+            if (onboardingData.email) {
+                summary.push(`<p><strong>Email:</strong> ${onboardingData.email}</p>`);
+            }
+            if (onboardingData.website) {
+                summary.push(`<p><strong>Website:</strong> ${onboardingData.website}</p>`);
+            }
+            if (onboardingData.brandedTracking?.visit) {
+                summary.push(`<p><strong>Visit:</strong> ${onboardingData.brandedTracking.visit}</p>`);
+            }
+            if (onboardingData.brandedTracking?.statics) {
+                summary.push(`<p><strong>Statics:</strong> ${onboardingData.brandedTracking.statics}</p>`);
+            }
+            if (onboardingData.productFeedUrl) {
+                summary.push(`<p><strong>Feed:</strong> ${onboardingData.productFeedUrl.substring(0, 40)}...</p>`);
+            }
+            if (onboardingData.officeIPs && onboardingData.officeIPs.length > 0) {
+                summary.push(`<p><strong>IPs:</strong> ${onboardingData.officeIPs.length} address(es)</p>`);
+            }
+            if (onboardingData.priority === 'high') {
+                summary.push(`<p class="text-orange-600"><strong>⚡ Priority:</strong> High</p>`);
+            }
+            if (onboardingData.errors && onboardingData.errors.length > 0) {
+                summary.push(`<p class="text-red-600"><strong>⚠️ Errors:</strong> ${onboardingData.errors.length}</p>`);
+            }
+
+            dataSummary.innerHTML = summary.length > 0 ? summary.join('') : '<p>No data collected yet</p>';
+        }
+
+        function handleFileUpload(event) {
+            const files = Array.from(event.target.files);
+            if (files.length > 0) {
+                const fileNames = files.map(f => f.name).join(', ');
+                messageInput.value = `I've uploaded the following files: ${fileNames}`;
+                sendMessage();
+            }
+        }
+
+        function showCompletionCelebration() {
+            completionBadge.classList.remove('hidden');
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+            messageInput.placeholder = "Onboarding complete! Our team will be in touch soon.";
+            
+            // Confetti effect (optional)
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createConfetti();
+                }, i * 50);
+            }
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.style.cssText = `
+                position: fixed;
+                width: 10px;
+                height: 10px;
+                background: ${['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][Math.floor(Math.random() * 5)]};
+                left: ${Math.random() * 100}%;
+                top: -20px;
+                border-radius: 50%;
+            `;
+            confetti.className = 'confetti';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+
+        // Check if webhook URL is configured
+        if (N8N_WEBHOOK_URL === 'YOUR_N8N_WEBHOOK_URL_HERE') {
+            setTimeout(() => {
+                addMessageToChat('assistant', '⚠️ Please configure your n8n webhook URL in the script.');
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
