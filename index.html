@@ -26,19 +26,12 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        .confetti {
-            animation: confetti-fall 3s ease-out forwards;
-        }
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-50">
     <div class="flex h-screen">
         <!-- Sidebar -->
-        <div class="w-80 bg-white shadow-lg p-6 overflow-y-auto">
+        <div class="w-96 bg-white shadow-lg p-6 overflow-y-auto">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Tradedoubler</h2>
                 <p class="text-sm text-gray-600">AI Onboarding Assistant</p>
@@ -55,19 +48,18 @@
                 </div>
             </div>
 
-            <!-- Completion Badge -->
-            <div id="completion-badge" class="hidden mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div class="flex items-center gap-2 mb-2">
-                    <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <!-- API Status -->
+            <div id="api-status" class="hidden mb-6 p-3 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="font-bold text-green-800">Onboarding Complete!</span>
+                    <span id="api-status-text" class="text-sm font-medium"></span>
                 </div>
-                <p class="text-xs text-green-700">Our team will contact you within 24 hours.</p>
             </div>
 
             <!-- Checklist -->
-            <div class="space-y-3">
+            <div class="space-y-3 mb-6">
                 <h3 class="text-sm font-semibold text-gray-700 mb-3">Onboarding Checklist</h3>
                 
                 <div id="checklist-intro" class="checklist-item flex items-center gap-3">
@@ -81,21 +73,21 @@
                     <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10" stroke-width="2"/>
                     </svg>
-                    <span class="text-sm text-gray-500">Branded Tracking Setup</span>
+                    <span class="text-sm text-gray-500">DNS Configuration</span>
                 </div>
 
                 <div id="checklist-productFeed" class="checklist-item flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10" stroke-width="2"/>
                     </svg>
-                    <span class="text-sm text-gray-500">Product Feed Links</span>
+                    <span class="text-sm text-gray-500">Product Feed</span>
                 </div>
 
                 <div id="checklist-assets" class="checklist-item flex items-center gap-3">
                     <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10" stroke-width="2"/>
                     </svg>
-                    <span class="text-sm text-gray-500">Program Assets</span>
+                    <span class="text-sm text-gray-500">Logos & Banners</span>
                 </div>
 
                 <div id="checklist-ipAddresses" class="checklist-item flex items-center gap-3">
@@ -113,16 +105,79 @@
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h3>
-                <button id="upload-btn" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                    Upload Files
+            <!-- File Upload Sections - ORGANIZED BY TYPE -->
+            <div class="space-y-4 border-t border-gray-200 pt-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-4">Upload Program Assets</h3>
+
+                <!-- Logo Upload -->
+                <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-medium text-gray-700">Logo</h4>
+                        <span class="text-xs text-gray-500">350x130px</span>
+                    </div>
+                    <button onclick="document.getElementById('logo-input').click()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Upload Logo
+                    </button>
+                    <input type="file" id="logo-input" accept=".png,.jpg,.jpeg" class="hidden">
+                    <div id="logo-list" class="mt-2 space-y-1"></div>
+                </div>
+
+                <!-- Banners Upload -->
+                <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-medium text-gray-700">Banners</h4>
+                        <span class="text-xs text-gray-500">Multiple</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-2">160x600, 300x250, 300x600, 728x90, 928x70</p>
+                    <button onclick="document.getElementById('banners-input').click()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Upload Banners
+                    </button>
+                    <input type="file" id="banners-input" accept=".jpg,.jpeg,.gif,.png" multiple class="hidden">
+                    <div id="banners-list" class="mt-2 space-y-1"></div>
+                </div>
+
+                <!-- Terms & Conditions -->
+                <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-medium text-gray-700">Terms & Conditions</h4>
+                        <span class="text-xs text-gray-500">PDF</span>
+                    </div>
+                    <button onclick="document.getElementById('terms-input').click()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Upload T&Cs
+                    </button>
+                    <input type="file" id="terms-input" accept=".pdf" class="hidden">
+                    <div id="terms-list" class="mt-2 space-y-1"></div>
+                </div>
+
+                <!-- Other Documents -->
+                <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-medium text-gray-700">Other Documents</h4>
+                        <span class="text-xs text-gray-500">Optional</span>
+                    </div>
+                    <button onclick="document.getElementById('other-input').click()" class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        Upload Files
+                    </button>
+                    <input type="file" id="other-input" multiple class="hidden">
+                    <div id="other-list" class="mt-2 space-y-1"></div>
+                </div>
+
+                <!-- Send All Button -->
+                <button id="send-all-files" class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed" disabled>
+                    Send All Files
                 </button>
-                <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.gif,.png,.csv,.xml" class="hidden">
             </div>
 
             <!-- Collected Data Summary -->
@@ -142,16 +197,13 @@
                 <div class="flex justify-start">
                     <div class="max-w-2xl rounded-2xl px-4 py-3 bg-white shadow-md text-gray-800 chat-message">
                         <p class="mb-2">Hi! 👋 I'm your Tradedoubler onboarding assistant.</p>
-                        <p class="mb-2">I'll guide you through setting up your affiliate program step by step. This typically takes 10-15 minutes.</p>
-                        <p class="mb-3"><strong>We'll cover:</strong></p>
+                        <p class="mb-3">I'll help you configure your affiliate program by setting up:</p>
                         <ul class="space-y-1 ml-4 mb-3">
-                            <li>• Branded Tracking setup</li>
-                            <li>• Product feed configuration</li>
-                            <li>• Program assets (logos, ads, T&Cs)</li>
-                            <li>• Office IP addresses</li>
-                            <li>• Tracking script implementation</li>
+                            <li>• <strong>DNS Configuration</strong> - I'll verify your branded tracking domains</li>
+                            <li>• <strong>Product Feed</strong> - I'll process and map your products automatically</li>
+                            <li>• <strong>Program Assets</strong> - Upload logos, banners, and T&Cs in organized folders</li>
                         </ul>
-                        <p>Let's get started! <strong>What's your name and which company are you representing?</strong></p>
+                        <p><strong>Let's get started! What's your name and company?</strong></p>
                     </div>
                 </div>
             </div>
@@ -180,12 +232,12 @@
 
     <script>
         // ============================================
-        // CONFIGURATION - UPDATE THIS WITH YOUR n8n WEBHOOK URL
+        // CONFIGURATION
         // ============================================
         const N8N_WEBHOOK_URL = 'https://harrytradedoubler2026.app.n8n.cloud/webhook/onboarding-chat';
         // ============================================
 
-        // State management
+        // State management - FILES NOW ORGANIZED BY CATEGORY
         let conversationHistory = [];
         let onboardingData = {};
         let checklist = {
@@ -196,22 +248,36 @@
             ipAddresses: false,
             trackingScripts: false
         };
+        
+        // ORGANIZED FILE STORAGE BY TYPE
+        let uploadedFiles = {
+            logo: [],
+            banners: [],
+            terms: [],
+            other: []
+        };
+        
         let sessionId = generateSessionId();
-        let isComplete = false;
 
         // DOM elements
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
         const sendBtn = document.getElementById('send-btn');
-        const uploadBtn = document.getElementById('upload-btn');
-        const fileInput = document.getElementById('file-input');
+        const sendAllFilesBtn = document.getElementById('send-all-files');
         const dataSummary = document.getElementById('data-summary');
-        const completionBadge = document.getElementById('completion-badge');
+        const apiStatus = document.getElementById('api-status');
+        const apiStatusText = document.getElementById('api-status-text');
+
+        // File inputs
+        const logoInput = document.getElementById('logo-input');
+        const bannersInput = document.getElementById('banners-input');
+        const termsInput = document.getElementById('terms-input');
+        const otherInput = document.getElementById('other-input');
 
         // Initialize
         conversationHistory.push({
             role: 'assistant',
-            content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll guide you through setting up your affiliate program step by step. This typically takes 10-15 minutes.\n\nWe'll cover:\n• Branded Tracking setup\n• Product feed configuration\n• Program assets (logos, ads, T&Cs)\n• Office IP addresses\n• Tracking script implementation\n\nLet's get started! What's your name and which company are you representing?"
+            content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll help you configure your affiliate program with organized asset uploads.\n\nLet's get started! What's your name and company?"
         });
 
         // Event listeners
@@ -222,8 +288,14 @@
                 sendMessage();
             }
         });
-        uploadBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFileUpload);
+
+        // File upload listeners for each category
+        logoInput.addEventListener('change', (e) => handleFileUpload(e, 'logo', 'logo-list'));
+        bannersInput.addEventListener('change', (e) => handleFileUpload(e, 'banners', 'banners-list'));
+        termsInput.addEventListener('change', (e) => handleFileUpload(e, 'terms', 'terms-list'));
+        otherInput.addEventListener('change', (e) => handleFileUpload(e, 'other', 'other-list'));
+        
+        sendAllFilesBtn.addEventListener('click', sendAllFiles);
 
         // Functions
         function generateSessionId() {
@@ -232,22 +304,18 @@
 
         async function sendMessage() {
             const message = messageInput.value.trim();
-            if (!message || sendBtn.disabled || isComplete) return;
+            if (!message || sendBtn.disabled) return;
 
-            // Disable input
             messageInput.disabled = true;
             sendBtn.disabled = true;
 
-            // Add user message to chat
             addMessageToChat('user', message);
             conversationHistory.push({ role: 'user', content: message });
             messageInput.value = '';
 
-            // Show loading indicator
             const loadingId = addLoadingIndicator();
 
             try {
-                // Call n8n webhook
                 const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
@@ -258,33 +326,45 @@
                         message: message,
                         conversationHistory: conversationHistory,
                         onboardingData: onboardingData,
-                        checklist: checklist
+                        checklist: checklist,
+                        uploadedFiles: uploadedFiles // Organized by category
                     })
                 });
 
                 const data = await response.json();
 
-                // Remove loading indicator
                 removeLoadingIndicator(loadingId);
 
-                // Add assistant response
                 addMessageToChat('assistant', data.response);
                 conversationHistory.push({ role: 'assistant', content: data.response });
 
-                // Update onboarding data and checklist
                 if (data.onboardingData) {
                     onboardingData = data.onboardingData;
                     updateDataSummary();
+                    
+                    // Show API status
+                    if (onboardingData.dnsVerified !== undefined) {
+                        showApiStatus(onboardingData.dnsVerified ? 'success' : 'error', 
+                                     onboardingData.dnsVerified ? 'DNS Verified!' : 'DNS Verification Failed');
+                    }
+                    if (onboardingData.feedProcessed !== undefined) {
+                        showApiStatus(onboardingData.feedProcessed ? 'success' : 'error',
+                                     onboardingData.feedProcessed ? `Feed Processed (${onboardingData.feedProductCount} products)` : 'Feed Processing Failed');
+                    }
+                    if (onboardingData.filesUploaded !== undefined) {
+                        showApiStatus(onboardingData.filesUploaded ? 'success' : 'error',
+                                     onboardingData.filesUploaded ? 'All Files Uploaded!' : 'File Upload Failed');
+                        if (onboardingData.filesUploaded) {
+                            // Clear all files after successful upload
+                            uploadedFiles = { logo: [], banners: [], terms: [], other: [] };
+                            clearAllFileLists();
+                            updateSendAllButton();
+                        }
+                    }
                 }
                 if (data.checklist) {
                     checklist = data.checklist;
                     updateChecklist(data.checklist);
-                }
-
-                // Check if complete
-                if (data.isComplete) {
-                    isComplete = true;
-                    showCompletionCelebration();
                 }
 
             } catch (error) {
@@ -292,13 +372,115 @@
                 removeLoadingIndicator(loadingId);
                 addMessageToChat('assistant', 'I apologize, but I encountered an error. Please try again.');
             } finally {
-                // Re-enable input
                 messageInput.disabled = false;
                 sendBtn.disabled = false;
-                if (!isComplete) {
-                    messageInput.focus();
-                }
+                messageInput.focus();
             }
+        }
+
+        function handleFileUpload(event, category, listId) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+
+            const listElement = document.getElementById(listId);
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedFiles[category].push({
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        data: e.target.result.split(',')[1],
+                        category: category // Tag with category
+                    });
+                    
+                    // Add to UI list
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'text-xs text-gray-600 flex items-center gap-2 p-1.5 bg-white rounded border border-gray-200';
+                    fileDiv.innerHTML = `
+                        <svg class="w-3 h-3 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="flex-1 truncate text-xs">${file.name}</span>
+                        <button onclick="removeFile('${category}', '${file.name}')" class="text-red-500 hover:text-red-700">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    `;
+                    listElement.appendChild(fileDiv);
+                    
+                    updateSendAllButton();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Clear input
+            event.target.value = '';
+        }
+
+        function removeFile(category, fileName) {
+            uploadedFiles[category] = uploadedFiles[category].filter(f => f.name !== fileName);
+            updateFileLists();
+            updateSendAllButton();
+        }
+
+        function updateFileLists() {
+            const lists = {
+                logo: 'logo-list',
+                banners: 'banners-list',
+                terms: 'terms-list',
+                other: 'other-list'
+            };
+
+            Object.keys(lists).forEach(category => {
+                const listElement = document.getElementById(lists[category]);
+                listElement.innerHTML = '';
+                
+                uploadedFiles[category].forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'text-xs text-gray-600 flex items-center gap-2 p-1.5 bg-white rounded border border-gray-200';
+                    fileDiv.innerHTML = `
+                        <svg class="w-3 h-3 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="flex-1 truncate text-xs">${file.name}</span>
+                        <button onclick="removeFile('${category}', '${file.name}')" class="text-red-500 hover:text-red-700">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    `;
+                    listElement.appendChild(fileDiv);
+                });
+            });
+        }
+
+        function clearAllFileLists() {
+            document.getElementById('logo-list').innerHTML = '';
+            document.getElementById('banners-list').innerHTML = '';
+            document.getElementById('terms-list').innerHTML = '';
+            document.getElementById('other-list').innerHTML = '';
+        }
+
+        function updateSendAllButton() {
+            const totalFiles = Object.values(uploadedFiles).reduce((sum, arr) => sum + arr.length, 0);
+            sendAllFilesBtn.disabled = totalFiles === 0;
+            sendAllFilesBtn.textContent = totalFiles > 0 ? `Send All Files (${totalFiles})` : 'Send All Files';
+        }
+
+        async function sendAllFiles() {
+            const totalFiles = Object.values(uploadedFiles).reduce((sum, arr) => sum + arr.length, 0);
+            if (totalFiles === 0) return;
+
+            const filesSummary = Object.entries(uploadedFiles)
+                .filter(([_, files]) => files.length > 0)
+                .map(([category, files]) => `${category}: ${files.length} file(s)`)
+                .join(', ');
+
+            messageInput.value = `I'm uploading ${totalFiles} files: ${filesSummary}`;
+            await sendMessage();
         }
 
         function addMessageToChat(role, content) {
@@ -312,12 +494,11 @@
                     : 'bg-white shadow-md text-gray-800'
             }`;
             
-            // Format content with line breaks and lists
             const formattedContent = content.split('\n').map(line => {
                 if (line.startsWith('•') || line.startsWith('-')) {
                     return `<p class="ml-4">${line}</p>`;
-                } else if (line.includes('===')) {
-                    return `<p class="font-bold mt-2">${line.replace(/=/g, '')}</p>`;
+                } else if (line.startsWith('✓') || line.startsWith('⚠️')) {
+                    return `<p class="font-medium ${line.startsWith('✓') ? 'text-green-600' : 'text-orange-600'}">${line}</p>`;
                 }
                 return line ? `<p class="mb-1">${line}</p>` : '<p class="mb-1"></p>';
             }).join('');
@@ -391,75 +572,36 @@
             if (onboardingData.email) {
                 summary.push(`<p><strong>Email:</strong> ${onboardingData.email}</p>`);
             }
-            if (onboardingData.website) {
-                summary.push(`<p><strong>Website:</strong> ${onboardingData.website}</p>`);
-            }
             if (onboardingData.brandedTracking?.visit) {
-                summary.push(`<p><strong>Visit:</strong> ${onboardingData.brandedTracking.visit}</p>`);
+                summary.push(`<p><strong>Visit:</strong> ${onboardingData.brandedTracking.visit} ${onboardingData.dnsVerified ? '✓' : ''}</p>`);
             }
             if (onboardingData.brandedTracking?.statics) {
-                summary.push(`<p><strong>Statics:</strong> ${onboardingData.brandedTracking.statics}</p>`);
+                summary.push(`<p><strong>Statics:</strong> ${onboardingData.brandedTracking.statics} ${onboardingData.dnsVerified ? '✓' : ''}</p>`);
             }
             if (onboardingData.productFeedUrl) {
-                summary.push(`<p><strong>Feed:</strong> ${onboardingData.productFeedUrl.substring(0, 40)}...</p>`);
+                summary.push(`<p><strong>Feed:</strong> ${onboardingData.productFeedUrl.substring(0, 30)}... ${onboardingData.feedProcessed ? '✓' : ''}</p>`);
+            }
+            if (onboardingData.feedProductCount) {
+                summary.push(`<p><strong>Products:</strong> ${onboardingData.feedProductCount}</p>`);
             }
             if (onboardingData.officeIPs && onboardingData.officeIPs.length > 0) {
                 summary.push(`<p><strong>IPs:</strong> ${onboardingData.officeIPs.length} address(es)</p>`);
             }
-            if (onboardingData.priority === 'high') {
-                summary.push(`<p class="text-orange-600"><strong>⚡ Priority:</strong> High</p>`);
-            }
-            if (onboardingData.errors && onboardingData.errors.length > 0) {
-                summary.push(`<p class="text-red-600"><strong>⚠️ Errors:</strong> ${onboardingData.errors.length}</p>`);
+            if (onboardingData.filesUploaded) {
+                summary.push(`<p class="text-green-600"><strong>✓ Assets Uploaded</strong></p>`);
             }
 
             dataSummary.innerHTML = summary.length > 0 ? summary.join('') : '<p>No data collected yet</p>';
         }
 
-        function handleFileUpload(event) {
-            const files = Array.from(event.target.files);
-            if (files.length > 0) {
-                const fileNames = files.map(f => f.name).join(', ');
-                messageInput.value = `I've uploaded the following files: ${fileNames}`;
-                sendMessage();
-            }
-        }
-
-        function showCompletionCelebration() {
-            completionBadge.classList.remove('hidden');
-            messageInput.disabled = true;
-            sendBtn.disabled = true;
-            messageInput.placeholder = "Onboarding complete! Our team will be in touch soon.";
+        function showApiStatus(type, message) {
+            apiStatus.className = `mb-6 p-3 rounded-lg ${type === 'success' ? 'bg-green-50 text-green-800' : 'bg-orange-50 text-orange-800'}`;
+            apiStatusText.textContent = message;
+            apiStatus.classList.remove('hidden');
             
-            // Confetti effect (optional)
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    createConfetti();
-                }, i * 50);
-            }
-        }
-
-        function createConfetti() {
-            const confetti = document.createElement('div');
-            confetti.style.cssText = `
-                position: fixed;
-                width: 10px;
-                height: 10px;
-                background: ${['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][Math.floor(Math.random() * 5)]};
-                left: ${Math.random() * 100}%;
-                top: -20px;
-                border-radius: 50%;
-            `;
-            confetti.className = 'confetti';
-            document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 3000);
-        }
-
-        // Check if webhook URL is configured
-        if (N8N_WEBHOOK_URL === 'YOUR_N8N_WEBHOOK_URL_HERE') {
             setTimeout(() => {
-                addMessageToChat('assistant', '⚠️ Please configure your n8n webhook URL in the script.');
-            }, 1000);
+                apiStatus.classList.add('hidden');
+            }, 5000);
         }
     </script>
 </body>
