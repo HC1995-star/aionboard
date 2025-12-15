@@ -187,6 +187,13 @@
                     <p>No data collected yet</p>
                 </div>
             </div>
+
+            <!-- Reset Button -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <button id="reset-onboarding" class="w-full px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium border border-red-200">
+                    Reset Onboarding
+                </button>
+            </div>
         </div>
 
         <!-- Chat area -->
@@ -339,6 +346,7 @@ content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll walk you 
         const dataSummary = document.getElementById('data-summary');
         const apiStatus = document.getElementById('api-status');
         const apiStatusText = document.getElementById('api-status-text');
+        const resetBtn = document.getElementById('reset-onboarding');
 
         // File inputs
         const logoInput = document.getElementById('logo-input');
@@ -362,8 +370,9 @@ content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll walk you 
         bannersInput.addEventListener('change', (e) => handleFileUpload(e, 'banners', 'banners-list'));
         termsInput.addEventListener('change', (e) => handleFileUpload(e, 'terms', 'terms-list'));
         otherInput.addEventListener('change', (e) => handleFileUpload(e, 'other', 'other-list'));
-        
+
         sendAllFilesBtn.addEventListener('click', sendAllFiles);
+        resetBtn.addEventListener('click', resetOnboarding);
 
         // Functions
         function generateSessionId() {
@@ -673,11 +682,78 @@ content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll walk you 
             apiStatus.className = `mb-6 p-3 rounded-lg ${type === 'success' ? 'bg-green-50 text-green-800' : 'bg-orange-50 text-orange-800'}`;
             apiStatusText.textContent = message;
             apiStatus.classList.remove('hidden');
-            
+
             setTimeout(() => {
                 apiStatus.classList.add('hidden');
             }, 5000);
         }
+
+        function resetOnboarding() {
+            if (!confirm('Are you sure you want to reset the onboarding? This will clear all conversation history, uploaded files, and collected data.')) {
+                return;
+            }
+
+            console.log('Resetting onboarding...');
+
+            // Clear all state
+            conversationHistory = [];
+            onboardingData = {};
+            checklist = {
+                intro: false,
+                brandedTracking: false,
+                productFeed: false,
+                assets: false,
+                ipAddresses: false,
+                trackingScripts: false
+            };
+            uploadedFiles = {
+                logo: [],
+                banners: [],
+                terms: [],
+                other: []
+            };
+            sessionId = generateSessionId();
+
+            // Clear localStorage
+            clearStoredState();
+
+            // Reset UI
+            chatContainer.innerHTML = '';
+            clearAllFileLists();
+
+            // Reset checklist UI
+            const items = ['intro', 'brandedTracking', 'productFeed', 'assets', 'ipAddresses', 'trackingScripts'];
+            items.forEach(item => {
+                const element = document.getElementById(`checklist-${item}`);
+                element.querySelector('svg').innerHTML = `
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                `;
+                element.querySelector('svg').classList.remove('text-green-500');
+                element.querySelector('svg').classList.add('text-gray-300');
+                element.querySelector('span').classList.remove('text-gray-700', 'font-medium');
+                element.querySelector('span').classList.add('text-gray-500');
+            });
+
+            // Reset progress bar
+            document.getElementById('progress-percentage').textContent = '0%';
+            document.getElementById('progress-bar').style.width = '0%';
+
+            // Reset data summary
+            dataSummary.innerHTML = '<p>No data collected yet</p>';
+
+            // Start fresh conversation
+            conversationHistory = [{
+                role: 'assistant',
+                content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll walk you through your setup from start to finish — branded tracking, product feeds, assets, logos & banners, IP whitelisting, and tracking scripts.\n\nLet's get started! What's your name and company?"
+            }];
+
+            renderConversationFromState();
+            saveStateToLocalStorage();
+            updateSendAllButton();
+
+            console.log('✓ Onboarding reset complete');
+        }
+
         // Initialize UI from storage once everything is defined
         window.addEventListener('load', initializeFromStorage);
     </script>
