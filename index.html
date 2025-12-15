@@ -192,21 +192,7 @@
         <!-- Chat area -->
         <div class="flex-1 flex flex-col">
             <!-- Chat messages -->
-            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <!-- Initial message -->
-                <div class="flex justify-start">
-                    <div class="max-w-2xl rounded-2xl px-4 py-3 bg-white shadow-md text-gray-800 chat-message">
-                        <p class="mb-2">Hi! 👋 I'm your Tradedoubler onboarding assistant.</p>
-                        <p class="mb-3">I'll help you configure your affiliate program by setting up:</p>
-                        <ul class="space-y-1 ml-4 mb-3">
-                            <li>• <strong>DNS Configuration</strong> - I'll verify your branded tracking domains</li>
-                            <li>• <strong>Product Feed</strong> - I'll process and map your products automatically</li>
-                            <li>• <strong>Program Assets</strong> - Upload logos, banners, and T&Cs in organized folders</li>
-                        </ul>
-                        <p><strong>Let's get started! What's your name and company?</strong></p>
-                    </div>
-                </div>
-            </div>
+            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
 
             <!-- Input area -->
             <div class="border-t border-gray-200 bg-white p-4">
@@ -259,6 +245,82 @@
         
         let sessionId = generateSessionId();
 
+        // LocalStorage keys and helpers
+        const STORAGE_KEY = 'tdd_onboarding_v1';
+
+        function saveStateToLocalStorage() {
+            try {
+                const payload = {
+                    conversationHistory,
+                    onboardingData,
+                    checklist,
+                    uploadedFiles,
+                    sessionId
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+            } catch (err) {
+                console.warn('Could not save state to localStorage', err);
+            }
+        }
+
+        function loadStateFromLocalStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+                const parsed = JSON.parse(raw);
+                if (parsed.conversationHistory) conversationHistory = parsed.conversationHistory;
+                if (parsed.onboardingData) onboardingData = parsed.onboardingData;
+                if (parsed.checklist) checklist = parsed.checklist;
+                if (parsed.uploadedFiles) uploadedFiles = parsed.uploadedFiles;
+                if (parsed.sessionId) sessionId = parsed.sessionId;
+                return true;
+            } catch (err) {
+                console.warn('Could not load state from localStorage', err);
+                return false;
+            }
+        }
+
+        function clearStoredState() {
+            try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+        }
+
+        function renderConversationFromState() {
+            const chatContainer = document.getElementById('chat-container');
+            if (!chatContainer) {
+                console.error('Chat container not found');
+                return;
+            }
+            chatContainer.innerHTML = '';
+            (conversationHistory || []).forEach(msg => {
+                addMessageToChat(msg.role, msg.content);
+            });
+        }
+
+        function initializeFromStorage() {
+            console.log('Initializing from storage...');
+            const had = loadStateFromLocalStorage();
+            console.log('Loaded state:', had, 'History length:', conversationHistory?.length);
+
+            // If no stored state or empty conversation, start fresh
+            if (!had || !conversationHistory || conversationHistory.length === 0) {
+                console.log('Starting fresh conversation');
+                conversationHistory = [{
+                    role: 'assistant',
+                    content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll help you configure your affiliate program with organized asset uploads.\n\nLet's get started! What's your name and company?"
+                }];
+                saveStateToLocalStorage();
+            } else {
+                console.log('Restoring conversation with', conversationHistory.length, 'messages');
+            }
+
+            // Render UI parts from loaded state
+            renderConversationFromState();
+            updateFileLists();
+            updateSendAllButton();
+            updateDataSummary();
+            updateChecklist(checklist);
+        }
+
         // DOM elements
         const chatContainer = document.getElementById('chat-container');
         const messageInput = document.getElementById('message-input');
@@ -274,11 +336,7 @@
         const termsInput = document.getElementById('terms-input');
         const otherInput = document.getElementById('other-input');
 
-        // Initialize
-        conversationHistory.push({
-            role: 'assistant',
-            content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll help you configure your affiliate program with organized asset uploads.\n\nLet's get started! What's your name and company?"
-        });
+        // Initialization now handled from localStorage on load
 
         // Event listeners
         sendBtn.addEventListener('click', sendMessage);
@@ -311,6 +369,7 @@
 
             addMessageToChat('user', message);
             conversationHistory.push({ role: 'user', content: message });
+            saveStateToLocalStorage();
             messageInput.value = '';
 
             const loadingId = addLoadingIndicator();
@@ -337,6 +396,7 @@
 
                 addMessageToChat('assistant', data.response);
                 conversationHistory.push({ role: 'assistant', content: data.response });
+                saveStateToLocalStorage();
 
                 if (data.onboardingData) {
                     onboardingData = data.onboardingData;
@@ -359,6 +419,7 @@
                             uploadedFiles = { logo: [], banners: [], terms: [], other: [] };
                             clearAllFileLists();
                             updateSendAllButton();
+                            saveStateToLocalStorage();
                         }
                     }
                 }
@@ -412,6 +473,7 @@
                     listElement.appendChild(fileDiv);
                     
                     updateSendAllButton();
+                    saveStateToLocalStorage();
                 };
                 reader.readAsDataURL(file);
             });
@@ -424,6 +486,7 @@
             uploadedFiles[category] = uploadedFiles[category].filter(f => f.name !== fileName);
             updateFileLists();
             updateSendAllButton();
+            saveStateToLocalStorage();
         }
 
         function updateFileLists() {
@@ -462,6 +525,7 @@
             document.getElementById('banners-list').innerHTML = '';
             document.getElementById('terms-list').innerHTML = '';
             document.getElementById('other-list').innerHTML = '';
+            saveStateToLocalStorage();
         }
 
         function updateSendAllButton() {
@@ -558,6 +622,7 @@
             const percentage = Math.round((completed / items.length) * 100);
             document.getElementById('progress-percentage').textContent = `${percentage}%`;
             document.getElementById('progress-bar').style.width = `${percentage}%`;
+            saveStateToLocalStorage();
         }
 
         function updateDataSummary() {
@@ -603,6 +668,8 @@
                 apiStatus.classList.add('hidden');
             }, 5000);
         }
+        // Initialize UI from storage once everything is defined
+        window.addEventListener('load', initializeFromStorage);
     </script>
 </body>
 </html>
