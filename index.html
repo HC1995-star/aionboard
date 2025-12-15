@@ -258,16 +258,26 @@
                     sessionId
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+                console.log('✓ Saved to localStorage:', {
+                    messages: conversationHistory?.length || 0,
+                    sessionId: sessionId
+                });
             } catch (err) {
-                console.warn('Could not save state to localStorage', err);
+                console.error('✗ Could not save state to localStorage', err);
             }
         }
 
         function loadStateFromLocalStorage() {
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
+                console.log('Loading from localStorage, raw data exists:', !!raw);
                 if (!raw) return false;
                 const parsed = JSON.parse(raw);
+                console.log('Parsed data:', {
+                    hasHistory: !!parsed.conversationHistory,
+                    historyLength: parsed.conversationHistory?.length || 0,
+                    hasSessionId: !!parsed.sessionId
+                });
                 if (parsed.conversationHistory) conversationHistory = parsed.conversationHistory;
                 if (parsed.onboardingData) onboardingData = parsed.onboardingData;
                 if (parsed.checklist) checklist = parsed.checklist;
@@ -275,7 +285,7 @@
                 if (parsed.sessionId) sessionId = parsed.sessionId;
                 return true;
             } catch (err) {
-                console.warn('Could not load state from localStorage', err);
+                console.error('✗ Could not load state from localStorage', err);
                 return false;
             }
         }
