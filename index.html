@@ -249,8 +249,11 @@
             terms: [],
             other: []
         };
-        
+
         let sessionId = generateSessionId();
+
+        // Read programID from URL query string
+        const programId = new URLSearchParams(window.location.search).get("programID");
 
         // LocalStorage keys and helpers
         const STORAGE_KEY = 'tdd_onboarding_v1';
@@ -405,7 +408,8 @@ content: "Hi! 👋 I'm your Tradedoubler onboarding assistant.\n\nI'll walk you 
                         conversationHistory: conversationHistory,
                         onboardingData: onboardingData,
                         checklist: checklist,
-                        uploadedFiles: uploadedFiles // Organized by category
+                        uploadedFiles: uploadedFiles, // Organized by category
+                        programId: programId // REQUIRED - Program ID from URL
                     })
                 });
 
